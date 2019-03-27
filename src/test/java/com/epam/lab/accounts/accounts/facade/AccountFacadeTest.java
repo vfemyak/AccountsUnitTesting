@@ -6,6 +6,7 @@ import com.epam.lab.accounts.accounts.service.AccountService;
 import com.epam.lab.accounts.accounts.service.ErrorsService;
 import com.epam.lab.accounts.accounts.service.SessionService;
 import com.epam.lab.accounts.accounts.validator.CreateAccountRequestRequestValidator;
+import org.apache.commons.validator.routines.UrlValidator;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -50,44 +51,44 @@ public class AccountFacadeTest {
     @Test
     public void testCreateAccountForCurrentUser() {
         //GIVEN
-        final CreateUpdateAccountRequest createAccountRequest = getDefaultCreateAccountRequest();
+        final CreateUpdateAccountRequest createAccountRequest = getCreateAccountRequest();
         final AccountDTO accountDTO = getNewAccount();
-//        when(accountService.isAccountAssignedToUser(createAccountRequest.getAccountCode(),
-//                "tommy.johnson@gmail.com")).thenReturn(true);
-//        when(accountService.isAccountExistsForAccountCode(createAccountRequest.getAccountCode())).thenReturn(false);
         when(accountService.isAccountExistsForAccountCode(createAccountRequest.getAccountCode()))
                 .thenReturn(false);
-        //todo add userFacade or userService
         //WHEN
         accountFacade.handleCreateOrUpdateAccountRequest(createAccountRequest);
         //THEN
         verify(accountService).createAccountForCurrentUser(accountDTO);
-//        verify(accountService).isAccountAssignedToUser(accountDTO.getCode(), "tommy.johnson@gmail.com");
     }
 
-//    @Test
-//    public void testUpdateAccountForCurrentUser() {
-//        //GIVEN
-//        final CreateUpdateAccountRequest createAccountRequest = getDefaultCreateAccountRequest();
-//        final AccountDTO accountDTO = getNewAccount();
-////        when(accountService.isAccountAssignedToUser(createAccountRequest.getAccountCode(),
-////                "tommy.johnson@gmail.com")).thenReturn(true);
-////        when(accountService.isAccountExistsForAccountCode(createAccountRequest.getAccountCode())).thenReturn(false);
-//        when(accountService.isAccountExistsForAccountCode(createAccountRequest.getAccountCode()))
-//                .thenReturn(true);
-//        //todo add userFacade or userService
-//        //WHEN
-//        accountFacade.handleCreateOrUpdateAccountRequest(createAccountRequest);
-//        //THEN
-//        verify(accountService).createAccountForCurrentUser(accountDTO);
-////        verify(accountService).isAccountAssignedToUser(accountDTO.getCode(), "tommy.johnson@gmail.com");
-//    }
+    @Test
+    public void testUpdateAccountForCurrentUser() {
+        //GIVEN
+        final CreateUpdateAccountRequest updateAccountRequest = getUpdateAccountRequest();
+        final AccountDTO accountDTO = getExistingAccount();
+        when(accountService.isAccountExistsForAccountCode(updateAccountRequest.getAccountCode()))
+                .thenReturn(true);
+        when(accountService.getAccountForAccountCode(updateAccountRequest.getAccountCode())).thenReturn(accountDTO);
+        //WHEN
+        accountFacade.handleCreateOrUpdateAccountRequest(updateAccountRequest);
+        //THEN
+        verify(accountService).updateAccount(accountDTO);
+    }
 
     @Test(expected = IllegalArgumentException.class)
     public void testCreateAccountForCurrentUserNegativeTest() {
         final CreateUpdateAccountRequest createUpdateAccountRequest = getIllegalCreateAccountRequest();
         when(accountService.isAccountExistsForAccountCode(createUpdateAccountRequest.getAccountCode()))
                 .thenReturn(false);
+        accountFacade.handleCreateOrUpdateAccountRequest(createUpdateAccountRequest);
+    }
+
+    @Test
+    public void testUpdateAccountForCurrentUserNegativeTest() {
+        final CreateUpdateAccountRequest createUpdateAccountRequest = getIllegalUpdateAccountRequest();
+        when(accountService.isAccountExistsForAccountCode(createUpdateAccountRequest.getAccountCode()))
+                .thenReturn(true);
+//        when(!UrlValidator.getInstance().isValid(createUpdateAccountRequest.getAccountImage())).thenReturn(false);
         accountFacade.handleCreateOrUpdateAccountRequest(createUpdateAccountRequest);
     }
 
@@ -100,8 +101,27 @@ public class AccountFacadeTest {
         return accountDTO;
     }
 
-    private CreateUpdateAccountRequest getDefaultCreateAccountRequest() {
+    private AccountDTO getExistingAccount() {
+        final AccountDTO accountDTO = new AccountDTO();
+        BigDecimal balance = new BigDecimal(2500000.0);
+        accountDTO.setCode("nokia-lumia");
+        accountDTO.setName("Nokia Lumia Department");
+        accountDTO.setBalance(balance);
+        accountDTO.setImg("https://upload.wikimedia.org/wikipedia/commons/thumb/f/f1/Nokia_Lumia_logo.svg/1280px-Nokia_Lumia_logo.svg.png");
+        return accountDTO;
+    }
+
+    private CreateUpdateAccountRequest getCreateAccountRequest() {
         final AccountDTO accountDTO = getNewAccount();
+        return getCreateUpdateAccountRequest(accountDTO);
+    }
+
+    private CreateUpdateAccountRequest getUpdateAccountRequest() {
+        final AccountDTO accountDTO = getExistingAccount();
+        return getCreateUpdateAccountRequest(accountDTO);
+    }
+
+    private CreateUpdateAccountRequest getCreateUpdateAccountRequest(AccountDTO accountDTO) {
         final CreateUpdateAccountRequest createAccountRequest = new CreateUpdateAccountRequest();
         createAccountRequest.setAccountCode(accountDTO.getCode());
         createAccountRequest.setAccountName(accountDTO.getName());
@@ -115,5 +135,15 @@ public class AccountFacadeTest {
         final CreateUpdateAccountRequest createAccountRequest = new CreateUpdateAccountRequest();
         createAccountRequest.setAccountCode(accountDTO.getCode());
         return createAccountRequest;
+    }
+
+    private CreateUpdateAccountRequest getIllegalUpdateAccountRequest() {
+        final AccountDTO accountDTO = getExistingAccount();
+        final CreateUpdateAccountRequest updateAccountRequest = new CreateUpdateAccountRequest();
+        updateAccountRequest.setAccountCode(accountDTO.getCode());
+        updateAccountRequest.setAccountBalance(accountDTO.getBalance());
+        updateAccountRequest.setAccountName(accountDTO.getName());
+        updateAccountRequest.setAccountImage("flowers.png");    //wrong format
+        return updateAccountRequest;
     }
 }
