@@ -13,9 +13,11 @@ import cucumber.api.java.en.Given;
 import cucumber.api.java.en.Then;
 import cucumber.api.java.en.When;
 import io.cucumber.datatable.DataTable;
+import org.junit.Rule;
+import org.junit.rules.ExpectedException;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.*;
 
 public class UserDefs {
 
@@ -51,7 +53,6 @@ public class UserDefs {
         loginPageController.onLoginRequest(userLoginRequest);
     }
 
-
     @Then("session contains info about session user:")
     public void sessionContainsInfoAboutSessionUser(final DataTable dataTable) {
         final UserDTO expectedSessionUser = CucumberUtils.toObject(dataTable, UserDTO.class);
@@ -66,5 +67,18 @@ public class UserDefs {
     public void userLogsInIntoApp(final String email) {
         final UserDTO user = userService.getUserForEmail(email);
         sessionService.setSessionUser(user);
+    }
+
+    @Then("user model doesn`t exist in database with attributes:")
+    public void userModelDoesntExistInDatabaseWithAttributes(final DataTable dataTable) {
+        final UserModel expectedUserModel = CucumberUtils.toObject(dataTable, UserModel.class);
+        boolean throwEx = false;
+        try {
+            final UserModel actualUserModel = userService.getUserModelForEmail(expectedUserModel.getEmail());
+        } catch (Exception e) {
+            throwEx = true;
+        } finally {
+            assertTrue(throwEx);
+        }
     }
 }

@@ -22,3 +22,16 @@ Feature: User operations feature
       | email     | tommy.johnson@gmail.com |
       | userRole  | USER                    |
 
+  Scenario: Check that user exists in database
+    Then user model exists in database with attributes:
+      | firstName | Volodymyr             |
+      | lastName  | Femiak                |
+      | email     | vova_femiak@gmail.com |
+      | password  | awesomepassword       |
+
+  Scenario: Check that user doesn`t exists in database
+    Then user model doesn`t exist in database with attributes:
+      | firstName | Jeck           |
+      | lastName  | Jeckovych      |
+      | email     | jeck@gmail.com |
+      | password  | awesd          |
