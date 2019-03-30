@@ -47,14 +47,24 @@ Feature: User to create account
   Scenario: Ability for user to login and view accounts
     Given browser opened at http://localhost:8080 url
     And user submit login form with attributes:
-      | email    | tommy.johnson@gmail.com |
-      | password | 1111                    |
+      | email    | vova_femiak@gmail.com |
+      | password | awesomepassword       |
     Then account details displayed on accounts grid page
-      | accountCode | pharma-group                |
-      | accountName | Danish Pharmaceutical group |
+      | accountCode | netflix          |
+      | accountName | Netflix Original |
     And account details displayed on accounts grid page
-      | accountCode | samsung-electronics             |
-      | accountName | Samsung Corporation Electronics |
-    And account details displayed on accounts grid page
-      | accountCode | nokia-lumia            |
-      | accountName | Nokia Lumia Department |
+      | accountCode | mwc-2019              |
+      | accountName | Mobile World Congress |
+
+  Scenario Outline: User login with invalid parameters
+    Given browser opened at http://localhost:8080 url
+    And user submit login form with attributes:
+      | email    | vova_femiak@example.com |
+      | password | coolpassword            |
+    Then "<alert_message>" is visible on Login Page
+
+    Examples:
+      | alert_message       |
+      | Unknown credentials |
+#      | Wrong password |
+#      | Empty credentials |

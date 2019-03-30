@@ -18,6 +18,8 @@ public class LoginPage extends PageObject {
     private PageElement submitButton;
     @FindBy(id = "home.accounts.${account}")
     private PageElement homeAccountForCode;
+    @FindBy (css = ".alert-danger")
+    private PageElement alertMessageBox;
 
     @Autowired
     public LoginPage(PageDriver pageDriver) {
@@ -29,5 +31,9 @@ public class LoginPage extends PageObject {
         emailInput.sendKeys(request.getEmail());
         passwordInput.sendKeys(request.getPassword());
         submitButton.submit();
+    }
+
+    public boolean isAlertMessageBoxVisible(){
+        return alertMessageBox.isCurrentlyVisible();
     }
 }

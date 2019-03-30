@@ -44,4 +44,19 @@ public class UserE2eDefs {
         final UserRegistrationRequest request = CucumberUtils.toObject(dataTable, UserRegistrationRequest.class);
         registrationPage.submitRegistrationForm(request);
     }
+
+    @Then("{string} is visible on Login Page")
+    public void alertMessageIsVisibleOnLoginPage(String alertMessage) {
+        switch (alertMessage) {
+            case "Unknown credentials":
+                assertTrue(loginPage.isAlertMessageBoxVisible());
+                break;
+            case "Wrong password":
+                assertTrue(loginPage.isAlertMessageBoxVisible());
+                break;
+            default:
+                throw new IllegalArgumentException();
+        }
+    }
+
 }
